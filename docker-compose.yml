@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: editor-frontend
+    build:
+      context: .
+    ports:
+      - 3000:80
+    networks:
+      - editor-network
+  backend:
+    image: editor-backend
+    networks:
+      - editor-network
+    ports:
+      - 8000:80
+
+networks:
+  editor-network: null
