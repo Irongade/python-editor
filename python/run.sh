@@ -1,5 +1,5 @@
 
 
 export FLASK_ENV=development
-export FLASK_APP=lint.py
+export FLASK_APP=app.py
 flask run

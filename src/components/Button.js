@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { FidgetSpinner } from "react-loader-spinner";
 
-export const Button = styled.button`
+export const Btn = styled.button`
   display: inline-flex;
   appearance: none;
   -webkit-box-align: center;
@@ -32,10 +32,10 @@ export const Button = styled.button`
   }
 `;
 
-const RunButton = ({ onClickFn, isLoading }) => {
+const Button = ({ onClickFn, isLoading, type, text }) => {
   return (
-    <Button onClick={onClickFn}>
-      {!isLoading && "Run"}
+    <Btn onClick={onClickFn}>
+      {!isLoading && text}
       {isLoading && (
         <FidgetSpinner
           visible={true}
@@ -48,8 +48,8 @@ const RunButton = ({ onClickFn, isLoading }) => {
           backgroundColor="#132b3e"
         />
       )}
-    </Button>
+    </Btn>
   );
 };
 
-export default RunButton;
+export default Button;

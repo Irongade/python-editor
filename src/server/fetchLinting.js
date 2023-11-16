@@ -29,11 +29,15 @@ export const pythonLinter = async (view) => {
 
   const payload = "code=" + encodeURIComponent(view.state.doc.toString());
 
-  const response = await axios.post("/api/lint", payload, {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
+  const response = await axios.post(
+    "https://api.pythoneditor.xyz/api/lint",
+    payload,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
 
   // console.log(
   //   response,
@@ -43,7 +47,7 @@ export const pythonLinter = async (view) => {
   //   view.state.doc.line(1).from + 0
   // );
 
-  console.log("lint", response.data);
+  console.log("lint", response, response.data, typeof response.data);
 
   if (response.status === 200) {
     annotations = response.data.map((lint) => {
@@ -63,6 +67,15 @@ export const pythonLinter = async (view) => {
           ? mapPos(lint.endLine, lint.endColumn, view.state.doc, {})
           : start;
 
+      const currentLine = view.state.doc.lineAt(start);
+
+      const currentLineText = view.state.sliceDoc(
+        currentLine.from,
+        currentLine.to
+      );
+
+      // console.log("Observeeee", currentLineText);
+
       return {
         message: lint.message,
         severity: severity,
@@ -71,6 +84,7 @@ export const pythonLinter = async (view) => {
         type: lint.type,
         code: lint["message-id"],
         symbol: lint.symbol,
+        line_text: currentLineText,
       };
     });
   }

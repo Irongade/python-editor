@@ -6,8 +6,10 @@ import { RouterProvider } from "react-router-dom";
 import { StateContext } from "./context";
 
 function App() {
-  const [userId, setUserId] = useState("");
-  const [skillLevel, setSkillLevel] = useState("");
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
+  const [skillLevel, setSkillLevel] = useState(
+    localStorage.getItem("skillLevel") || ""
+  );
 
   const ctxt = useMemo(
     () => ({

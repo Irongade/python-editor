@@ -1,23 +1,22 @@
-from pylint import epylint, run_pylint, run_epylint
-from io import StringIO
+from pylint import epylint
 import os
 import tempfile
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, request
 from flask_cors import CORS
 
-from pylint.lint import Run
-from pylint.reporters.text import TextReporter
+# from pylint.lint import Run
+# from pylint.reporters.text import TextReporter
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 CORS(app)
 
 
 @app.route('/')
-# @app.route('/<path:path>')
+# # @app.route('/<path:path>')
 def index():
     # return render_template('index.html')
-    return app.send_static_file('index.html')
-    # return "Hello"
+    # return app.send_static_file('index.html')
+    return "Hello"
 
 
 @app.route('/api/lint', methods=['POST'])
@@ -63,14 +62,14 @@ def lint_action():
 
 
 # @app.route('/<path:path>')
-def serve_paths():
-    return render_template('index.html')
-    # return app.send_static_file('index.html')
-    # return "Hello"
+# def serve_paths():
+#     return render_template('index.html')
+#     # return app.send_static_file('index.html')
+#     # return "Hello"
 
 
-@app.errorhandler(404)
-def handle_404(e):
-    if request.path.startswith("/api/"):
-        return jsonify(message="Resource not found"), 404
-    return send_from_directory(app.static_folder, "index.html")
+# @app.errorhandler(404)
+# def handle_404(e):
+#     if request.path.startswith("/api/"):
+#         return jsonify(message="Resource not found"), 404
+#     return send_from_directory(app.static_folder, "index.html")

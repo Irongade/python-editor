@@ -1,5 +1,5 @@
 import React from "react";
-import RunButton from "./RunButton";
+import RunButton from "./Button";
 import styled from "styled-components";
 
 const HeaderContainer = styled.div`
@@ -18,13 +18,20 @@ const HeaderContainer = styled.div`
   margin-bo
 `;
 
-const QuestionNumberContainer = styled.h2``;
+const QuestionNumberText = styled.h2``;
+
+const QuestionNumberContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+`;
 
 const NextQuestionContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 15%;
+  width: 20%;
+  gap: 20px;
 `;
 
 const Btn = styled.button`
@@ -57,14 +64,40 @@ const Btn = styled.button`
   }
 `;
 
-const Header = ({ onClickFn, questionNo }) => {
+const ResultText = styled.h4`
+  font-size: 1rem;
+  color: ${(props) => (props.correct ? "rgba(45 181 93)" : "rgba(239 71 67)")};
+  margin: 0;
+  margin-left: 1rem;
+`;
+
+const Header = ({ onClickFn, questionNo, questionTestStatus, openModalFn }) => {
+  const didAllTestsPass = questionTestStatus[questionNo];
+
+  console.log(
+    "header tests",
+    `${questionNo}` in questionTestStatus,
+    didAllTestsPass
+  );
   return (
     <HeaderContainer>
-      <QuestionNumberContainer>Question {questionNo}</QuestionNumberContainer>
+      <QuestionNumberContainer>
+        <QuestionNumberText>Question {questionNo}</QuestionNumberText>
+
+        {`${questionNo}` in questionTestStatus && didAllTestsPass && (
+          <ResultText correct>All tests passed</ResultText>
+        )}
+
+        {`${questionNo}` in questionTestStatus && !didAllTestsPass && (
+          <ResultText>Some tests failed</ResultText>
+        )}
+      </QuestionNumberContainer>
 
       <NextQuestionContainer>
         <Btn onClick={() => onClickFn(false)}>Prev Question</Btn>
         <Btn onClick={() => onClickFn(true)}>Next Question</Btn>
+
+        <Btn onClick={() => openModalFn()}>End Session</Btn>
       </NextQuestionContainer>
     </HeaderContainer>
   );

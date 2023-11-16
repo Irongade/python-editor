@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { sha256 } from "ohash";
-import axios from "axios";
-import { find_imports_wrapper, py_error_reformater } from "../constants";
+// import { find_imports_wrapper, py_error_reformater } from "../constants";
 import date from "date-and-time";
 import doc from "../server/connectGsheets";
 
@@ -10,6 +9,7 @@ export const Events = {
   executeScript: "executeScript",
   logEvent: "logEvent",
   logLintMetrics: "logLintMetrics",
+  updateQuestion: "updateQuestion",
 };
 
 export const WindowEvent = {
@@ -25,7 +25,7 @@ if ("function" === typeof importScripts) {
   // eslint-disable-next-line no-undef
   importScripts("https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js");
 
-  console.log(self);
+  console.log("worker self", self);
   self[CONSOLE_KEY] = [];
 
   let isPyodideInitialized = false;
@@ -33,6 +33,7 @@ if ("function" === typeof importScripts) {
   let currentRunCodeHash = "";
   let userId = "";
   let lintErrors = new Set();
+  let currentQuestion = {};
 
   async function loadPyodideAndPackages(packages) {
     self.pyodide = await self.loadPyodide();
@@ -42,25 +43,56 @@ if ("function" === typeof importScripts) {
 
     self.pyodide.setStdout({
       batched: (msg) => {
-        console.log(msg);
         self[CONSOLE_KEY] = [...self[CONSOLE_KEY], msg];
       },
     });
   }
 
-  async function extractImportedPackages(code) {
-    const script = find_imports_wrapper(JSON.stringify(code));
+  // async function extractImportedPackages(code) {
+  //   const script = find_imports_wrapper(JSON.stringify(code));
 
-    let result = await self.pyodide.runPythonAsync(script);
+  //   let result = await self.pyodide.runPythonAsync(script);
 
-    return result.toJs();
+  //   return result.toJs();
+  // }
+
+  async function executeScript(python) {
+    let output = {};
+
+    let consoleOutput = [];
+    self[CONSOLE_KEY] = [];
+
+    try {
+      const res = await self.pyodide.runPythonAsync(python);
+
+      consoleOutput = self[CONSOLE_KEY];
+
+      // console.log("execute script", res);
+      output = {
+        result: res,
+        isError: false,
+        consoleOutput,
+      };
+    } catch (error) {
+      // console.log("execute script error", error.message);
+      consoleOutput = self[CONSOLE_KEY];
+
+      output = {
+        result: error.message,
+        isError: true,
+        consoleOutput,
+      };
+    }
+
+    return output;
   }
 
   const initialize = async (event) => {
-    const { id, packages, userIdentifier } = event.data;
+    const { id, packages, userIdentifier, question, userDetails } = event.data;
 
     userId = userIdentifier;
-    console.log("init", id, packages, userIdentifier, userId);
+    currentQuestion = question;
+    // console.log("init params", id, packages, userIdentifier, userId);
 
     let response = {};
     try {
@@ -76,17 +108,13 @@ if ("function" === typeof importScripts) {
       );
 
       const initDocLoadStart = performance.now();
-
       await doc.loadInfo();
-
       const initDocLoadEnd = performance.now();
 
       console.log(
         "Total google doc init time taken: ",
         (initDocLoadEnd - initDocLoadStart) / 1000
       );
-
-      // console.log("resp", doc, doc.title, await doc.sheetsById[0].getRows());
 
       const now = new Date();
 
@@ -96,15 +124,21 @@ if ("function" === typeof importScripts) {
         time: date.format(now, "HH:mm:ss"),
         date: date.format(now, "YYYY/MM/DD"),
       };
-      const sheet = doc.sheetsByTitle["Window"];
-      // await sheet.addRow(initaliedPayload);
+      const windowSheet = doc.sheetsByTitle["Window"];
+      await windowSheet.addRow(initaliedPayload);
+
+      const userSheet = doc.sheetsByTitle["Users"];
+      await userSheet.addRow({
+        ...userDetails,
+        time: date.format(now, "HH:mm:ss"),
+        date: date.format(now, "YYYY/MM/DD"),
+      });
 
       response = { id: id, result: "success" };
       isPyodideInitialized = true;
 
-      console.log("INITIALIZED", sheet);
+      console.log("INITIALIZATION COMPLETE");
     } catch (err) {
-      console.log("err", err);
       response = { id: id, result: "failed" };
 
       isPyodideInitialized = false;
@@ -115,73 +149,76 @@ if ("function" === typeof importScripts) {
   };
 
   const runPythonScript = async (event) => {
-    const { id, python, ...context } = event.data;
+    const { id, python, question, ...context } = event.data;
     // The worker copies the context in its own "memory" (an object mapping name to values)
     for (const key of Object.keys(context)) {
       self[key] = context[key];
     }
 
-    //  we clear any previous console output.
-    self[CONSOLE_KEY] = [];
-
-    // console.log("hereee", self.pyodide.loadedPackages, ps);
-    //       self.pyodide.runPython(`
-    // import sys
-    // def reformat_exception():
-    //     from traceback import format_exception
-    //     # Format a modified exception here
-    //     # this just prints it normally but you could for instance filter some frames
-    //     return "".join(
-    //         format_exception(sys.last_type, sys.last_value, sys.last_traceback)
-    //     )
-    // `);
-    //       let reformat_exception = self.pyodide.globals.get("reformat_exception");
-
-    //       console.log(reformat_exception, "inside");
-
-    console.log("run resp", doc, doc.title);
-
     const previousRunCodeHash = currentRunCodeHash;
 
     currentRunCodeHash = sha256(python);
 
-    console.log("heree", currentRunCodeHash, previousRunCodeHash);
+    console.log("compare hash", currentRunCodeHash, previousRunCodeHash);
     let payload = {};
 
-    // Now is the easy part, the one that is similar to working in the main thread:
-    try {
-      // const packagesToImport = await extractImportedPackages(python);
+    await self.pyodide.loadPackagesFromImports(python);
 
-      // if (packagesToImport.length !== pyodidePackages.length) {
-      //   console.log(
-      //     "hereee",
-      //     self.pyodide.loadedPackages,
-      //     packagesToImport,
-      //     pyodidePackages
-      //   );
-      //   pyodidePackages = packagesToImport;
-      // }
+    let didAllTestsPass = true;
+    let isExecutionSuccessful = true;
+    let output = {};
+    let failingTests = [];
 
-      await self.pyodide.loadPackagesFromImports(python);
-      let result = await self.pyodide.runPythonAsync(python);
+    // execute for output
+    const result = await executeScript(python);
 
-      const consoleOuputs = self[CONSOLE_KEY];
+    if (result.isError) {
+      isExecutionSuccessful = false;
+    }
 
-      payload = { result, id, console: consoleOuputs, isSuccess: true };
-    } catch (error) {
-      // error.message = reformat_exception();
+    output = {
+      result: result,
+    };
 
-      // console.log(error.message, reformat_exception());
+    // execute for tests
+    for (let i = 0; i < question.tests.length; i++) {
+      const currentTest = question.tests[i];
 
-      const consoleOuputs = self[CONSOLE_KEY];
+      const assertTestScript = python + currentTest.test;
+      const testCase = python + currentTest.case;
 
-      payload = {
-        error: error.message,
-        id,
-        console: consoleOuputs,
-        isSuccess: false,
+      const assertTestResult = await executeScript(assertTestScript);
+
+      const testCaseResult = await executeScript(testCase);
+
+      // if we expect output of current test to be true and we get an error
+      // then a test has failed.
+      if (currentTest.result && assertTestResult.isError) {
+        didAllTestsPass = false;
+
+        failingTests.push(currentTest);
+      }
+
+      output = {
+        ...output,
+        [`case${i + 1}`]: didAllTestsPass // if at this point all tests have passed then reset the response of the execution
+          ? {
+              ...assertTestResult,
+              result: testCaseResult.result,
+              isError: false,
+            }
+          : assertTestResult,
       };
     }
+
+    payload = {
+      result: output,
+      id,
+      isSuccess: isExecutionSuccessful,
+      didAllTestsPass,
+      question_id: question.id,
+      failingTests,
+    };
 
     if (currentRunCodeHash !== previousRunCodeHash) {
       const sheet = doc.sheetsByTitle["Execution"];
@@ -192,25 +229,27 @@ if ("function" === typeof importScripts) {
         user_id: userId,
         run_hash: currentRunCodeHash,
         code: python,
-        run_output: payload.isSuccess ? payload.result : payload.error,
-        is_execution_success: payload.isSuccess,
+        did_tests_pass: didAllTestsPass,
+        is_execution_success: isExecutionSuccessful,
+        question_id: question.id,
+        question_test_output: JSON.stringify(payload.result),
         time: date.format(now, "HH:mm:ss"),
         date: date.format(now, "YYYY/MM/DD"),
       };
 
-      console.log("run output", rowData);
+      console.log("run payload for gsheets", rowData, payload);
 
-      // figure out did_test_pass flag
-
-      // await sheet.addRow(rowData);
+      await sheet.addRow(rowData);
       // user_id	run_hash	run_output	did_test_pass	is_execution_success time
     }
+
+    console.log("final run output", payload);
 
     self.postMessage(payload);
   };
 
   const lintCode = async (event) => {
-    const { id, annotations } = event.data;
+    const { annotations } = event.data;
 
     const errors = [];
 
@@ -231,24 +270,26 @@ if ("function" === typeof importScripts) {
 
       errors.push({
         user_id: userId,
-        classification: annotation.symbol, // work on error classification
+        current_question_id: currentQuestion.id,
+        lint_classification: annotation.symbol, // work on error classification
         lint_message: annotation.message,
         lint_severity: annotation.severity,
         lint_type: annotation.type,
         lint_code: annotation.code,
+        lint_code_line: annotation.line_text,
         time: date.format(now, "HH:mm:ss"),
         date: date.format(now, "YYYY/MM/DD"),
       });
     });
 
-    console.log("lint", errors, annotations, lintErrors);
+    console.log("lint errors", errors, annotations, lintErrors);
 
     if (errors.length > 0) {
       const sheet = doc.sheetsByTitle["Linting"];
       await sheet.addRows(errors);
     }
 
-    // Linting: user_id	lint_classification	lint_message	lint_severity	time	date
+    // Linting: user_id current_question_id	lint_classification	lint_message	lint_severity	time	date
   };
 
   const logEvent = async (event) => {
@@ -258,6 +299,7 @@ if ("function" === typeof importScripts) {
 
     const payload = {
       user_id: userId,
+      current_question_id: currentQuestion.id,
       window_event_type: eventType,
       time: date.format(now, "HH:mm:ss"),
       date: date.format(now, "YYYY/MM/DD"),
@@ -266,7 +308,13 @@ if ("function" === typeof importScripts) {
     console.log("event", payload);
 
     const sheet = doc.sheetsByTitle["Window"];
-    // await sheet.addRow(payload);
+    await sheet.addRow(payload);
+  };
+
+  const updateQuestion = (event) => {
+    const { question } = event.data;
+
+    currentQuestion = question;
   };
 
   self.onmessage = async (event) => {
@@ -280,6 +328,14 @@ if ("function" === typeof importScripts) {
 
     if (!isPyodideInitialized) {
       return self.postMessage({ error: "Pyodide initialization failed" });
+    }
+
+    if (!userId) {
+      return self.postMessage({ error: "" });
+    }
+
+    if (event.data.type === Events.updateQuestion) {
+      updateQuestion(event);
     }
 
     if (event.data.type === Events.executeScript) {

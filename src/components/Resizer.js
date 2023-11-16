@@ -4,10 +4,20 @@ import styled from "styled-components";
 const ResizerDragger = styled.div`
   border: solid 0 #e2e8f0;
   margin: 5px;
-  cursor: ew-resize;
-  width: 8px;
-  height: 100%;
+  cursor: ${(props) =>
+    props.orientation === "horizontal" ? "ew-resize" : "ns-resize"};
   position: relative;
+
+  ${(props) =>
+    props.orientation === "horizontal"
+      ? `
+  height: 100%;
+  width: 8px;
+  `
+      : `
+  width: 100px;
+  height: 8px;
+  `}
 
   &&&::after {
     background-color: #00000014;
@@ -15,12 +25,20 @@ const ResizerDragger = styled.div`
     border: solid 0 #e2e8f0;
 
     content: "";
-    height: 24px;
     left: 41%;
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+    ${(props) =>
+      props.orientation === "horizontal"
+        ? `
+    height: 24px;
     width: 2px;
+    `
+        : `
+    width: 24px;
+    height: 2px;
+    `}
   }
 `;
 
@@ -62,7 +80,7 @@ const Resizer = ({ direction = "horizontal" }) => {
           break;
       }
 
-      const cursor = direction === "horizontal" ? "col-resize" : "row-resize";
+      const cursor = direction === "horizontal" ? "ew-resize" : "ns-resize";
 
       resizer.current.style.cursor = cursor;
       document.body.style.cursor = cursor;
@@ -128,6 +146,7 @@ const Resizer = ({ direction = "horizontal" }) => {
       ref={resizer}
       className="resizer"
       id="dragMe"
+      orientation={direction}
     ></ResizerDragger>
   );
 };

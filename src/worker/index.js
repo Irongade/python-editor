@@ -19,7 +19,7 @@ pyodideWorker.onmessage = (event) => {
 };
 
 const runPythonScript = (() => {
-  return (script, context) => {
+  return (script, question, context) => {
     const id = uuidv4();
     return new Promise((onSuccess) => {
       callbacks[id] = onSuccess;
@@ -27,6 +27,7 @@ const runPythonScript = (() => {
         ...context,
         type: Events.executeScript,
         python: script,
+        question,
         id,
       });
     });
@@ -42,31 +43,28 @@ const initializePyodide = (() => {
         type: Events.initialize,
         packages: data.packages || [],
         userIdentifier: data.userId,
+        question: data.question,
+        userDetails: data.userDetails,
         id,
       });
     });
   };
 })();
 
-// const logLintAnnotations = (() => {
-//   return (annotations = []) => {
-//     const id = uuidv4();
-//     return new Promise((onSuccess) => {
-//       callbacks[id] = onSuccess;
-//       pyodideWorker.postMessage({
-//         type: Events.logLintMetrics,
-//         annotations: annotations,
-//         id,
-//       });
-//     });
-//   };
-// })();
-
 const logLintAnnotations = (annotations = []) => {
   const id = uuidv4();
   pyodideWorker.postMessage({
     type: Events.logLintMetrics,
     annotations: annotations,
+    id,
+  });
+};
+
+const updateCurrentQuestion = (question = {}) => {
+  const id = uuidv4();
+  pyodideWorker.postMessage({
+    type: Events.updateQuestion,
+    question: question,
     id,
   });
 };
@@ -80,6 +78,10 @@ const logEvent = (eventType) => {
   });
 };
 
-console.log("log", logLintAnnotations);
-
-export { runPythonScript, initializePyodide, logLintAnnotations, logEvent };
+export {
+  runPythonScript,
+  initializePyodide,
+  logLintAnnotations,
+  logEvent,
+  updateCurrentQuestion,
+};

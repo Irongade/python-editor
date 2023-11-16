@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EditorState } from "@codemirror/state";
 import { basicSetup } from "codemirror";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
-import { oneDark } from "@codemirror/theme-one-dark";
+// import { oneDark } from "@codemirror/theme-one-dark";
 import { python } from "@codemirror/lang-python";
 import { lintGutter, linter } from "@codemirror/lint";
 import { pythonLinter } from "../server/fetchLinting";
 import styled from "styled-components";
 
 const EditorWrapper = styled.div``;
-export default function Editor({ view, parent }) {
+export default function Editor({ view, parent, initValue }) {
   const [code, setCode] = useState("");
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Editor({ view, parent }) {
     });
 
     const startState = EditorState.create({
-      doc: "",
+      doc: initValue,
       extensions: [
         basicSetup,
         keymap.of([defaultKeymap, indentWithTab]),
@@ -39,7 +39,7 @@ export default function Editor({ view, parent }) {
     return () => {
       editorView.destroy();
     };
-  }, [parent, view]);
+  }, [initValue, parent, view]);
 
   return <EditorWrapper ref={view}></EditorWrapper>;
 }

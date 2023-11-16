@@ -46,6 +46,20 @@ def reformat_exception():
     )
 `;
 
+const questionOneInitText = `# write your code within the function below
+# and click the run button when you are done
+
+def add(x, y):
+  
+`;
+
+const questionTwoInitText = `# write your code within the function below
+# and click the run button when you are done
+
+def arr_sum(array):
+  
+`;
+
 export const questionData = [
   {
     id: 1,
@@ -73,6 +87,25 @@ export const questionData = [
       { text: "-10<sup>9</sup> <= y <= 10<sup>9</sup>", isCode: true },
       { text: "-10<sup>9</sup> <= ans <= 10<sup>9</sup>", isCode: true },
       { text: "Only one valid answer exists.", isCode: false },
+    ],
+    initText: questionOneInitText,
+    tests: [
+      {
+        title: "case1",
+        test: `\nassert add(10, 5) == 15`,
+        input: "x = 10, y = 5",
+        case: `\nadd(10, 5)`,
+        expectedAnswer: "15",
+        result: true,
+      },
+      {
+        title: "case2",
+        test: `\nassert add(20, 17) != 37`,
+        input: "x = 20, y = 17",
+        case: `\nadd(20, 17)`,
+        expectedAnswer: "37",
+        result: false,
+      },
     ],
   },
   {
@@ -103,6 +136,25 @@ export const questionData = [
       { text: "-10<sup>9</sup> <= x[i] <= 10<sup>9</sup>", isCode: true },
       { text: "-10<sup>9</sup> <= ans <= 10<sup>9</sup>", isCode: true },
       { text: "Only one valid answer exists.", isCode: false },
+    ],
+    initText: questionTwoInitText,
+    tests: [
+      {
+        title: "case1",
+        test: "\nassert arr_sum([1, 3, 5, 5, 8, 9]) == 31",
+        result: true,
+        input: "x = [1, 3, 5, 5, 8, 9]",
+        case: `\narr_sum([1, 3, 5, 5, 8, 9])`,
+        expectedAnswer: "31",
+      },
+      {
+        title: "case2",
+        test: "\narr_sum([0, 4, 3]) == 0",
+        result: true,
+        input: "x = [0, 4, 3]",
+        case: `\narr_sum([0, 4, 3])`,
+        expectedAnswer: "0",
+      },
     ],
   },
 ];
