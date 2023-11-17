@@ -27,14 +27,40 @@ export const Btn = styled.button`
   color: #132b3e;
   cursor: pointer;
 
+  ${(props) =>
+    props.type === "danger" &&
+    `
+  color: white;
+  background: #E53E3E;
+  `}
+
+  ${(props) =>
+    props.type === "primary" &&
+    `
+  color: white;
+  background: var(--color-secondary);
+  `}
+
   &&:hover {
     background: #e2e8f0;
+
+    ${(props) =>
+      props.type === "danger" &&
+      `
+      background: #C53030;
+    `}
+
+    ${(props) =>
+      props.type === "primary" &&
+      `
+      background: #0c699a;
+    `}
   }
 `;
 
 const Button = ({ onClickFn, isLoading, type, text }) => {
   return (
-    <Btn onClick={onClickFn}>
+    <Btn type={type} onClick={onClickFn}>
       {!isLoading && text}
       {isLoading && (
         <FidgetSpinner

@@ -17,6 +17,7 @@ import Header from "../components/Header";
 import Skeleton from "../components/Skeleton";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
+import { useNavigate } from "react-router-dom";
 
 import { StateContext } from "../context";
 
@@ -43,6 +44,7 @@ const QuestionContainer = styled.div`
   padding: 1.25rem 1rem;
   border-radius: 8px;
   margin-left: 1rem;
+  overflow-y: scroll;
 `;
 
 const BodyContainer = styled.div`
@@ -62,7 +64,7 @@ const EditorContainer = styled.div`
   height: 50%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: scroll;
 
   background-color: white;
   border-radius: 8px;
@@ -76,6 +78,7 @@ const EditorContainer = styled.div`
 const OutputContainer = styled.div`
   width: 100%;
   flex: 1 1 0%;
+  overflow: scroll;
 
   // height: 40%;
   background-color: white;
@@ -105,6 +108,7 @@ function Interface() {
   const [isPyodideReady, setIsPyodideReady] = useState(false);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const { userId, skillLevel } = useContext(StateContext);
+  const navigate = useNavigate();
 
   // question
   const [currentQuestion, setCurrentQuestion] = useState(questionData[0]);
@@ -238,6 +242,12 @@ function Interface() {
     [answers, currentQuestion]
   );
 
+  const endSession = () => {
+    logEvent(WindowEvent.CLOSE);
+
+    navigate("/end");
+  };
+
   console.log("app context", userId, skillLevel);
   console.log("run output", output);
 
@@ -283,17 +293,17 @@ function Interface() {
       </AppContainer>
 
       <Modal open={openModal} onClose={() => setOpenModal(false)} center>
-        <h2>End Session</h2>
+        <h2 style={{ marginBottom: "1rem" }}>End Session</h2>
 
-        <p>
+        <p style={{ marginBottom: "1rem" }}>
           Are you sure you want to end the current session? This action is not
           reversible.
         </p>
 
-        <div>
-          <div>
-            <Button text={"Confirm"} />
-            <Button onClickFn={() => setOpenModal(false)} text={"Close"} />
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <Button onClickFn={endSession} type={"danger"} text={"Confirm"} />
+            <Button onClickFn={() => setOpenModal(false)} text={"Go back"} />
           </div>
         </div>
       </Modal>

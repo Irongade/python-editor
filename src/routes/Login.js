@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { StateContext } from "../context";
 import uniqueRandom from "unique-random";
+import Button from "../components/Button";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,8 +36,14 @@ const Login = () => {
             <div className="form-img-container">
               <img src="Rectangle.gif" alt="Auth gif animation" />
             </div>
-            <h4 className="banner__heading heading-4">Take test.</h4>
+            <h4 className="banner__heading heading-4 heading-4-margin">
+              Start Session.
+            </h4>
             {error && <p className="form-header-error">{error}</p>}
+
+            <p className="banner__heading heading-text no-margin">
+              {`Please input your username and Skill level (Beginner, Intermediate, Advanced)`}
+            </p>
           </div>
           <div className="input-container">
             <input
@@ -63,9 +70,10 @@ const Login = () => {
           </div>
 
           <div className="btn-container max-width center-btn-text">
-            <button className="btn btn-primary" onClick={beginSession}>
+            <Button type={"primary"} text={"Begin"} onClickFn={beginSession} />
+            {/* <button className="btn btn-primary" onClick={beginSession}>
               <span>Begin</span>
-            </button>
+            </button> */}
           </div>
           {/* <div className="auth-subtext-container">
             <p>

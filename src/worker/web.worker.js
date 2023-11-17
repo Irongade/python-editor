@@ -10,6 +10,7 @@ export const Events = {
   logEvent: "logEvent",
   logLintMetrics: "logLintMetrics",
   updateQuestion: "updateQuestion",
+  closeEvent: "closeEvent",
 };
 
 export const WindowEvent = {
@@ -336,6 +337,14 @@ if ("function" === typeof importScripts) {
 
     if (event.data.type === Events.updateQuestion) {
       updateQuestion(event);
+    }
+
+    if (event.data.type === Events.closeEvent) {
+      lintErrors = new Set();
+      currentQuestion = {};
+      currentRunCodeHash = "";
+      userId = "";
+      self[CONSOLE_KEY] = [];
     }
 
     if (event.data.type === Events.executeScript) {

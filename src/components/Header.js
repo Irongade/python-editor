@@ -28,10 +28,9 @@ const QuestionNumberContainer = styled.div`
 
 const NextQuestionContainer = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   width: 20%;
-  gap: 20px;
 `;
 
 const Btn = styled.button`
@@ -94,10 +93,12 @@ const Header = ({ onClickFn, questionNo, questionTestStatus, openModalFn }) => {
       </QuestionNumberContainer>
 
       <NextQuestionContainer>
-        <Btn onClick={() => onClickFn(false)}>Prev Question</Btn>
-        <Btn onClick={() => onClickFn(true)}>Next Question</Btn>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <Btn onClick={() => onClickFn(false)}>Prev Question</Btn>
+          <Btn onClick={() => onClickFn(true)}>Next Question</Btn>
 
-        <Btn onClick={() => openModalFn()}>End Session</Btn>
+          <Btn onClick={() => openModalFn()}>End Session</Btn>
+        </div>
       </NextQuestionContainer>
     </HeaderContainer>
   );

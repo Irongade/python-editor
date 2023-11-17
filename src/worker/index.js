@@ -78,10 +78,19 @@ const logEvent = (eventType) => {
   });
 };
 
+const closeSession = () => {
+  const id = uuidv4();
+  pyodideWorker.postMessage({
+    type: Events.closeEvent,
+    id,
+  });
+};
+
 export {
   runPythonScript,
   initializePyodide,
   logLintAnnotations,
   logEvent,
   updateCurrentQuestion,
+  closeSession,
 };
