@@ -60,6 +60,13 @@ def arr_sum(array):
   
 `;
 
+const questionThreeInitText = `# write your code within the function below
+# and click the run button when you are done
+
+def key_press_duration(array):
+  
+`;
+
 export const questionData = [
   {
     id: 1,
@@ -80,6 +87,13 @@ export const questionData = [
         input: "Input: x = 20, y = 17",
         output: "Output: 37",
         explanation: "Explanation: 20 + 17 = 37",
+      },
+
+      {
+        title: "Example 3:",
+        input: "Input: x = 55, y = 45",
+        output: "Output: 100",
+        explanation: "Explanation: 55 + 45 = 100",
       },
     ],
     constraints: [
@@ -106,6 +120,14 @@ export const questionData = [
         expectedAnswer: "37",
         result: false,
       },
+      {
+        title: "case3",
+        test: `\nassert add(55, 45) == 100`,
+        input: "x = 55, y = 45",
+        case: `\nadd(55, 45)`,
+        expectedAnswer: "100",
+        result: true,
+      },
     ],
   },
   {
@@ -129,6 +151,13 @@ export const questionData = [
         output: "Output: 0",
         explanation:
           "Explanation: Since length of array is less than 5, output is 0",
+      },
+      {
+        title: "Example 3:",
+        input: "Input: x = [2, 8, 9, 1, 5, 2]",
+        output: "Output: 27",
+        explanation:
+          "Explanation: Since length of array is greater than 5, then 2 + 8 + 9 + 1 + 5 + 2 = 31",
       },
     ],
     constraints: [
@@ -154,6 +183,80 @@ export const questionData = [
         input: "x = [0, 4, 3]",
         case: `\narr_sum([0, 4, 3])`,
         expectedAnswer: "0",
+      },
+      {
+        title: "case3",
+        test: "\narr_sum([2, 8, 9, 1, 5, 2]) != 0",
+        result: true,
+        input: "x = [2, 8, 9, 1, 5, 2]",
+        case: `\narr_sum([2, 8, 9, 1, 5, 2])`,
+        expectedAnswer: "27",
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "KeyPress Estimation",
+    subText1:
+      "Write a function that takes in an array of times of when a user presses a key in microseconds and computes how long between each keypress there was.",
+    subText2:
+      "You can assume that the time always go up so item array[x] <= array[x+1].",
+    subText3:
+      "The function should return an array that contains the gaps/durations between each keypress time.",
+    examples: [
+      {
+        title: "Example 1:",
+        input: "Input: duration = [0, 10, 100, 200, 230]",
+        output: "Output: [10,90, 100, 30]",
+        explanation:
+          "Explanation: Since duration between 10 - 0 = 10; 100 - 10 = 90; ...etc; return array is [10,90,100,30]",
+      },
+      {
+        title: "Example 2:",
+        input: "Input: duration = [0, 20, 40, 80, 160, 320]",
+        output: "Output: [20, 20, 40, 80, 160]",
+        explanation:
+          "Explanation: Since duration between 20 - 0 = 10; 40 - 20 = 20; ...etc; return array is [20, 20, 40, 80, 160]",
+      },
+      {
+        title: "Example 3:",
+        input: "Input: duration = [0, 1, 2, 3, 4, 5]",
+        output: "Output: [1, 1, 1, 1, 1]",
+        explanation:
+          "Explanation: Since duration between 1 - 0 = 1; 2 - 1 = 1; ...etc; return array is [1, 1, 1, 1, 1]",
+      },
+    ],
+    constraints: [
+      { text: "2 <= x.length <= 10<sup>4</sup>", isCode: true },
+      { text: "-10<sup>9</sup> <= x[i] <= 10<sup>9</sup>", isCode: true },
+      { text: "-10<sup>9</sup> <= ans <= 10<sup>9</sup>", isCode: true },
+      { text: "Only one valid answer exists.", isCode: false },
+    ],
+    initText: questionThreeInitText,
+    tests: [
+      {
+        title: "case1",
+        test: "\nexpected_py = [10, 90, 100, 30]\narg_py = [0, 10, 100, 200, 230]\nassert all([a == b for a,b in zip(expected_py, key_press_duration(arg_py))])",
+        result: true,
+        input: "durations = [0, 10, 100, 200, 230]",
+        case: `\nkey_press_duration([0, 10, 100, 200, 230])`,
+        expectedAnswer: "[10, 90, 100, 30]",
+      },
+      {
+        title: "case2",
+        test: "\nexpected_py = [20, 20, 40, 80, 160]\narg_py = [0, 20, 40, 80, 160, 320]\nassert all([a == b for a,b in zip(expected_py, key_press_duration(arg_py))])",
+        result: true,
+        input: "durations = [0, 20, 40, 80, 160, 320]",
+        case: `\nkey_press_duration([0, 20, 40, 80, 160, 320])`,
+        expectedAnswer: "[20, 20, 40, 80, 160]",
+      },
+      {
+        title: "case3",
+        test: "\nexpected_py = [1, 1, 1, 1, 1]\narg_py = [0, 1, 2, 3, 4, 5]\nassert all([a == b for a,b in zip(expected_py, key_press_duration(arg_py))])",
+        result: true,
+        input: "durations = [0, 1, 2, 3, 4, 5]",
+        case: `\nkey_press_duration([0, 1, 2, 3, 4, 5])`,
+        expectedAnswer: "[1, 1, 1, 1, 1]",
       },
     ],
   },

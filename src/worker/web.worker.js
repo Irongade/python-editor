@@ -64,9 +64,13 @@ if ("function" === typeof importScripts) {
     self[CONSOLE_KEY] = [];
 
     try {
-      const res = await self.pyodide.runPythonAsync(python);
+      let res = await self.pyodide.runPythonAsync(python);
 
       consoleOutput = self[CONSOLE_KEY];
+
+      if (self.pyodide.isPyProxy(res)) {
+        res = res.toJs();
+      }
 
       // console.log("execute script", res);
       output = {
@@ -121,6 +125,7 @@ if ("function" === typeof importScripts) {
 
       const initaliedPayload = {
         user_id: userId,
+        current_question_id: question.id,
         window_event_type: WindowEvent.INIT,
         time: date.format(now, "HH:mm:ss"),
         date: date.format(now, "YYYY/MM/DD"),
@@ -192,6 +197,8 @@ if ("function" === typeof importScripts) {
 
       const testCaseResult = await executeScript(testCase);
 
+      console.log("test case - ", assertTestResult, testCaseResult);
+
       // if we expect output of current test to be true and we get an error
       // then a test has failed.
       if (currentTest.result && assertTestResult.isError) {
@@ -202,13 +209,10 @@ if ("function" === typeof importScripts) {
 
       output = {
         ...output,
-        [`case${i + 1}`]: didAllTestsPass // if at this point all tests have passed then reset the response of the execution
-          ? {
-              ...assertTestResult,
-              result: testCaseResult.result,
-              isError: false,
-            }
-          : assertTestResult,
+        [`case${i + 1}`]: {
+          ...assertTestResult,
+          result: testCaseResult.result,
+        },
       };
     }
 

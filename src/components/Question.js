@@ -69,12 +69,12 @@ const Question = ({ question }) => {
     <div>
       <QuestionTitle>{question.title}</QuestionTitle>
 
-      <QuestionDescription>{question.subText1}</QuestionDescription>
+      <QuestionDescription>{parse(question.subText1)}</QuestionDescription>
 
-      <QuestionDescription>{question.subText2}</QuestionDescription>
+      <QuestionDescription>{parse(question.subText2)}</QuestionDescription>
 
       {question.subText3 && (
-        <QuestionDescription>{question.subText3}</QuestionDescription>
+        <QuestionDescription>{parse(question.subText3)}</QuestionDescription>
       )}
 
       <QuestionSubContainer>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
@@ -146,12 +146,24 @@ const Output = ({ output, currentQuestion }) => {
     currentQuestion.tests[0].title
   );
 
+  useEffect(() => {
+    setCurrentTest(currentQuestion);
+  }, [currentQuestion]);
+
   const [currentConsoleTest, setCurrentConsoleTest] = useState(
     currentQuestion.tests[0].title
   );
 
+  // console.log(
+  //   "output cont",
+  //   currentTest,
+  //   currentQuestion,
+  //   output,
+  //   output && output[currentTest]
+  // );
+
   const didTestFail = useMemo(() => {
-    return output && output[currentTest].isError;
+    return output && output[currentTest] && output[currentTest].isError;
   }, [currentTest, output]);
 
   return (
@@ -191,11 +203,13 @@ const Output = ({ output, currentQuestion }) => {
                         key={test.id}
                       >
                         <TestCase>
-                          {output[test.title] && output[test.title] && (
-                            <ResultIndicator
-                              correct={!output[test.title].isError}
-                            />
-                          )}
+                          {output &&
+                            output[test.title] &&
+                            output[test.title] && (
+                              <ResultIndicator
+                                correct={!output[test.title].isError}
+                              />
+                            )}
                           <span>Case {index + 1} </span>
                         </TestCase>
                       </Tab>
@@ -204,7 +218,7 @@ const Output = ({ output, currentQuestion }) => {
                 </TabList>
 
                 {currentQuestion.tests.map((test) => {
-                  const testOutput = output[test.title];
+                  const testOutput = output && output[test.title];
                   return (
                     <TabPanel key={test.id}>
                       <HeaderText>Input</HeaderText>
@@ -221,19 +235,16 @@ const Output = ({ output, currentQuestion }) => {
 
                       <HeaderText>Actual Output</HeaderText>
                       <ResultDisplay height={"55px"}>
-                        <p>{testOutput && testOutput.result}</p>
+                        <p>
+                          {testOutput &&
+                            testOutput.result &&
+                            JSON.stringify(testOutput.result)}
+                        </p>
                       </ResultDisplay>
                     </TabPanel>
                   );
                 })}
               </Tabs>
-              {/* <TestCaseContainer>
-                  <TestCase> Case 1 </TestCase>
-                  <TestCase> Case 2 </TestCase>
-                  <TestCase> Case 3 </TestCase>
-                </TestCaseContainer> */}
-
-              {/* <ResultDisplay height={"auto"}>{output.result}</ResultDisplay>x */}
             </>
           </ResultsWrapper>
         </TabPanel>
@@ -248,7 +259,7 @@ const Output = ({ output, currentQuestion }) => {
                       key={test.id}
                     >
                       <TestCase>
-                        {output[test.title] && output[test.title] && (
+                        {output && output[test.title] && output[test.title] && (
                           <ResultIndicator
                             correct={!output[test.title].isError}
                           />
@@ -261,7 +272,7 @@ const Output = ({ output, currentQuestion }) => {
               </TabList>
 
               {currentQuestion.tests.map((test) => {
-                const testConsole = output[test.title];
+                const testConsole = output && output[test.title];
                 return (
                   <TabPanel key={test.id}>
                     <ResultDisplay height={"200px"}>

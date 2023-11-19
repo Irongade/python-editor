@@ -70,7 +70,13 @@ const ResultText = styled.h4`
   margin-left: 1rem;
 `;
 
-const Header = ({ onClickFn, questionNo, questionTestStatus, openModalFn }) => {
+const Header = ({
+  onClickFn,
+  questionNo,
+  questionTestStatus,
+  openModalFn,
+  isPyodideReady,
+}) => {
   const didAllTestsPass = questionTestStatus[questionNo];
 
   console.log(
@@ -93,12 +99,14 @@ const Header = ({ onClickFn, questionNo, questionTestStatus, openModalFn }) => {
       </QuestionNumberContainer>
 
       <NextQuestionContainer>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <Btn onClick={() => onClickFn(false)}>Prev Question</Btn>
-          <Btn onClick={() => onClickFn(true)}>Next Question</Btn>
+        {isPyodideReady && (
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <Btn onClick={() => onClickFn(false)}>Prev Question</Btn>
+            <Btn onClick={() => onClickFn(true)}>Next Question</Btn>
 
-          <Btn onClick={() => openModalFn()}>End Session</Btn>
-        </div>
+            <Btn onClick={() => openModalFn()}>End Session</Btn>
+          </div>
+        )}
       </NextQuestionContainer>
     </HeaderContainer>
   );

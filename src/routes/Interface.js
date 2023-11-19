@@ -37,6 +37,7 @@ const AppContainer = styled.div`
 
 const QuestionContainer = styled.div`
   // width: 50%;
+  max-width: 50%;
   height: 95%;
   display: flex;
   flex-direction: column;
@@ -115,7 +116,7 @@ function Interface() {
   const [answers, setAnswers] = useState({});
   const [questionTestStatus, setQuestionTestStatus] = useState({});
 
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState({});
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -126,7 +127,7 @@ function Interface() {
     const result = await runPythonScript(code, currentQuestion);
 
     if ("result" in result) {
-      setOutput(result.result);
+      setOutput({ [currentQuestion.id]: result.result });
     }
 
     setQuestionTestStatus({ [currentQuestion.id]: result.didAllTestsPass });
@@ -258,6 +259,7 @@ function Interface() {
         onClickFn={changeQuestion}
         openModalFn={() => setOpenModal(true)}
         questionTestStatus={questionTestStatus}
+        isPyodideReady={isPyodideReady}
       />
       <AppContainer>
         <QuestionContainer>
@@ -287,7 +289,10 @@ function Interface() {
           </EditorContainer>
           <Resizer direction="vertical" />
           <OutputContainer>
-            <Output output={output} currentQuestion={currentQuestion} />
+            <Output
+              output={output[currentQuestion.id]}
+              currentQuestion={currentQuestion}
+            />
           </OutputContainer>
         </BodyContainer>
       </AppContainer>
